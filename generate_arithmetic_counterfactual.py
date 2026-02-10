@@ -5,7 +5,7 @@ Counterfactual Arithmetic Problem Dataset Generator
 Generates arithmetic problems with corrupted versions (x, x') and their corresponding
 correct answers (y, y'). Uses sign switching as the corruption method.
 
-Output: JSON file with counterfactual pairs in numeric format
+Output: JSON files with counterfactual pairs in numeric, English, Spanish, and Italian formats
 """
 
 import argparse
@@ -62,12 +62,14 @@ def corrupt_problem_by_sign_switching(problem: Dict) -> Dict:
     return corrupted
 
 
-def generate_counterfactual_dataset(problems: List[Dict]) -> List[Dict]:
+def generate_counterfactual_dataset(problems: List[Dict], language: str = 'numeric') -> List[Dict]:
     """
     Generate counterfactual dataset with x, x', y, y' for each problem.
+    Filters out problems where y' == y (same answer for original and corrupted).
     
     Args:
         problems: List of original problem dictionaries
+        language: Language format ('numeric', 'en', 'es', 'it')
     
     Returns:
         List of counterfactual entries with x, x', y, y'
@@ -76,14 +78,20 @@ def generate_counterfactual_dataset(problems: List[Dict]) -> List[Dict]:
     counterfactual_entries = []
     
     for problem in problems:
-        # Format original problem (x, y)
-        x_prompt, y_answer = formatter.format_numeric(problem)
-        
         # Create corrupted problem
         corrupted_problem = corrupt_problem_by_sign_switching(problem)
         
-        # Format corrupted problem (x', y')
-        x_prime_prompt, y_prime_answer = formatter.format_numeric(corrupted_problem)
+        # Skip if corrupted problem has the same result as original
+        if problem['result'] == corrupted_problem['result']:
+            continue
+        
+        # Format original problem (x, y) based on language
+        if language == 'numeric':
+            x_prompt, y_answer = formatter.format_numeric(problem)
+            x_prime_prompt, y_prime_answer = formatter.format_numeric(corrupted_problem)
+        else:
+            x_prompt, y_answer = formatter.format_verbal(problem, language=language)
+            x_prime_prompt, y_prime_answer = formatter.format_verbal(corrupted_problem, language=language)
         
         # Create counterfactual entry
         entry = {
@@ -125,6 +133,64 @@ def save_counterfactual_dataset(entries: List[Dict], output_filename: str):
     print(f"Saved {output_path} ({len(entries)} counterfactual entries)")
 
 
+def generate_problems_with_valid_counterfactuals(
+    generator: ArithmeticProblemGenerator,
+    n_problems: int,
+    seen_problems: set = None
+) -> List[Dict]:
+    """
+    Generate problems and filter out those where corrupted version has same answer.
+    Continues generating until we have n_problems with valid counterfactuals.
+    
+    Args:
+        generator: ArithmeticProblemGenerator instance
+        n_problems: Target number of problems with valid counterfactuals
+        seen_problems: Set of problem signatures already seen
+    
+    Returns:
+        List of problem dictionaries with valid counterfactuals
+    """
+    if seen_problems is None:
+        seen_problems = set()
+    
+    valid_problems = []
+    max_attempts = n_problems * 20  # Allow more attempts to account for filtering
+    attempts = 0
+    
+    while len(valid_problems) < n_problems and attempts < max_attempts:
+        attempts += 1
+        problem = generator.generate_problem()
+        
+        if problem is None:
+            continue
+        
+        # Check uniqueness
+        signature = generator._create_problem_signature(problem)
+        if signature in seen_problems:
+            continue
+        
+        # Create corrupted version and check if it has different result
+        corrupted_problem = corrupt_problem_by_sign_switching(problem)
+        
+        # Skip if corrupted problem has the same result as original
+        if problem['result'] == corrupted_problem['result']:
+            continue
+        
+        # Valid problem - add it
+        seen_problems.add(signature)
+        valid_problems.append(problem)
+        
+        # Progress indicator
+        if len(valid_problems) % 100 == 0:
+            print(f"Generated {len(valid_problems)}/{n_problems} valid problems...")
+    
+    if len(valid_problems) < n_problems:
+        print(f"Warning: Only generated {len(valid_problems)} valid problems out of {n_problems} requested")
+        print(f"  (Some problems were skipped because corrupted versions had the same answer)")
+    
+    return valid_problems
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Generate counterfactual arithmetic problem dataset with sign-switched corruptions',
@@ -156,9 +222,13 @@ def main():
                         help='Avoid reverse pairs for 2-term addition (if 34+21, skip 21+34)')
     
     # Output
-    parser.add_argument('-o', '--output-filename', type=str, 
-                        default='arith_dataset_numeric_counterfactual.json',
-                        help='Output filename (will be saved in data/json/)')
+    parser.add_argument('-o', '--output-prefix', type=str, default='arith_dataset',
+                        help='Output filename prefix')
+    
+    # New argument to select specific formats
+    parser.add_argument('--formats', type=str, nargs='+', default=['all'],
+                        choices=['all', 'numeric', 'en', 'es', 'it'],
+                        help='Specific problem formats to generate (default: all)')
     
     # Other
     parser.add_argument('--seed', type=int, default=None,
@@ -182,6 +252,8 @@ def main():
     print(f"  Avoid clean multiples: {args.avoid_clean_multiples}")
     print(f"  Avoid reverse pairs: {args.avoid_reverse_pairs}")
     print(f"  Corruption method: Sign switching (all signs)")
+    print(f"  Filter: Skipping problems where y' == y")
+    print(f"  Target formats: {', '.join(args.formats)}")
     print(f"  Random seed: {args.seed if args.seed else 'None'}")
     print()
     
@@ -197,9 +269,9 @@ def main():
         seed=args.seed
     )
     
-    # Generate problems
-    print("Generating problems...")
-    problems = generator.generate_problems(args.num_problems)
+    # Generate problems with valid counterfactuals (filtering out y' == y)
+    print("Generating problems with valid counterfactuals...")
+    problems = generate_problems_with_valid_counterfactuals(generator, args.num_problems)
     
     if len(problems) == 0:
         print("Error: No problems generated. Try relaxing constraints.")
@@ -213,42 +285,71 @@ def main():
     for i, problem in enumerate(problems):
         problem['id'] = f"prob_{i:06d}"
     
-    # Generate counterfactual entries
+    # Determine which formats to generate
+    target_formats = []
+    if 'all' in args.formats:
+        target_formats = ['numeric', 'en', 'es', 'it']
+    else:
+        target_formats = args.formats
+    
+    # Generate and save counterfactual datasets for each format
     print("\nGenerating counterfactual pairs (x, x', y, y')...")
-    counterfactual_entries = generate_counterfactual_dataset(problems)
     
-    # Save dataset
-    print("\nSaving counterfactual dataset...")
-    save_counterfactual_dataset(counterfactual_entries, args.output_filename)
+    # Language names for filenames
+    format_names = {
+        'numeric': 'numeric',
+        'en': 'english',
+        'es': 'spanish',
+        'it': 'italian'
+    }
     
-    # Print statistics
+    # Store numeric entries for statistics
+    numeric_entries = None
+    
+    for format_key in target_formats:
+        # Generate counterfactual entries for this format
+        counterfactual_entries = generate_counterfactual_dataset(problems, language=format_key)
+        
+        # Save dataset
+        format_name = format_names[format_key]
+        output_filename = f"{args.output_prefix}_{format_name}_counterfactual.json"
+        save_counterfactual_dataset(counterfactual_entries, output_filename)
+        
+        # Store numeric entries for statistics
+        if format_key == 'numeric':
+            numeric_entries = counterfactual_entries
+    
+    # Print statistics (using numeric format as reference)
     print("\n=== Dataset Statistics ===")
-    print(f"Total counterfactual entries: {len(counterfactual_entries)}")
+    if numeric_entries is None:
+        # Generate numeric entries if not already generated
+        numeric_entries = generate_counterfactual_dataset(problems, language='numeric')
+    print(f"Total counterfactual entries: {len(numeric_entries)}")
     
     # Count by split
     split_counts = defaultdict(int)
-    for entry in counterfactual_entries:
+    for entry in numeric_entries:
         split_counts[entry['split']] += 1
-    print(f"Train: {split_counts['train']} ({split_counts['train']/len(counterfactual_entries)*100:.1f}%)")
-    print(f"Val: {split_counts['val']} ({split_counts['val']/len(counterfactual_entries)*100:.1f}%)")
-    print(f"Test: {split_counts['test']} ({split_counts['test']/len(counterfactual_entries)*100:.1f}%)")
+    print(f"Train: {split_counts['train']} ({split_counts['train']/len(numeric_entries)*100:.1f}%)")
+    print(f"Val: {split_counts['val']} ({split_counts['val']/len(numeric_entries)*100:.1f}%)")
+    print(f"Test: {split_counts['test']} ({split_counts['test']/len(numeric_entries)*100:.1f}%)")
     
     # Count by characteristics
     terms_counts = defaultdict(int)
     digits_counts = defaultdict(int)
     carry_counts = defaultdict(int)
     
-    for entry in counterfactual_entries:
+    for entry in numeric_entries:
         terms_counts[entry['n_terms']] += 1
         digits_counts[entry['n_digits']] += 1
         carry_counts[entry['has_carry']] += 1
     
-    print(f"\n2-term problems: {terms_counts[2]} ({terms_counts[2]/len(counterfactual_entries)*100:.1f}%)")
-    print(f"3-term problems: {terms_counts[3]} ({terms_counts[3]/len(counterfactual_entries)*100:.1f}%)")
-    print(f"2-digit problems: {digits_counts[2]} ({digits_counts[2]/len(counterfactual_entries)*100:.1f}%)")
-    print(f"3-digit problems: {digits_counts[3]} ({digits_counts[3]/len(counterfactual_entries)*100:.1f}%)")
-    print(f"Problems with carry/borrow: {carry_counts[True]} ({carry_counts[True]/len(counterfactual_entries)*100:.1f}%)")
-    print(f"Problems without carry/borrow: {carry_counts[False]} ({carry_counts[False]/len(counterfactual_entries)*100:.1f}%)")
+    print(f"\n2-term problems: {terms_counts[2]} ({terms_counts[2]/len(numeric_entries)*100:.1f}%)")
+    print(f"3-term problems: {terms_counts[3]} ({terms_counts[3]/len(numeric_entries)*100:.1f}%)")
+    print(f"2-digit problems: {digits_counts[2]} ({digits_counts[2]/len(numeric_entries)*100:.1f}%)")
+    print(f"3-digit problems: {digits_counts[3]} ({digits_counts[3]/len(numeric_entries)*100:.1f}%)")
+    print(f"Problems with carry/borrow: {carry_counts[True]} ({carry_counts[True]/len(numeric_entries)*100:.1f}%)")
+    print(f"Problems without carry/borrow: {carry_counts[False]} ({carry_counts[False]/len(numeric_entries)*100:.1f}%)")
     
     print("\n=== Done! ===")
 
