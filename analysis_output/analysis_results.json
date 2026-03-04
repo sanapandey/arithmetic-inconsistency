@@ -1,0 +1,962 @@
+{
+  "layer_importance": {
+    "model.layers.0": 0.97,
+    "model.layers.1": 0.97,
+    "model.layers.10": 0.97,
+    "model.layers.11": 0.97,
+    "model.layers.12": 0.97,
+    "model.layers.13": 0.97,
+    "model.layers.14": 0.97,
+    "model.layers.15": 0.97,
+    "model.layers.16": 0.97,
+    "model.layers.17": 0.97,
+    "model.layers.18": 0.97,
+    "model.layers.19": 0.97,
+    "model.layers.2": 0.97,
+    "model.layers.20": 0.97,
+    "model.layers.21": 0.97,
+    "model.layers.22": 0.97,
+    "model.layers.23": 0.97,
+    "model.layers.24": 0.97,
+    "model.layers.25": 0.97,
+    "model.layers.26": 0.97,
+    "model.layers.27": 0.97,
+    "model.layers.28": 0.97,
+    "model.layers.29": 0.97,
+    "model.layers.3": 0.97,
+    "model.layers.30": 0.97,
+    "model.layers.31": 0.97,
+    "model.layers.4": 0.97,
+    "model.layers.5": 0.97,
+    "model.layers.6": 0.97,
+    "model.layers.7": 0.97,
+    "model.layers.8": 0.97,
+    "model.layers.9": 0.97
+  },
+  "early_vs_late": {
+    "early": 0.9700000000000001,
+    "middle": 0.9700000000000002,
+    "late": 0.9700000000000002,
+    "early_layers": [
+      "model.layers.0",
+      "model.layers.1",
+      "model.layers.2",
+      "model.layers.3",
+      "model.layers.4",
+      "model.layers.5",
+      "model.layers.6",
+      "model.layers.7",
+      "model.layers.8",
+      "model.layers.9"
+    ],
+    "middle_layers": [
+      "model.layers.10",
+      "model.layers.11",
+      "model.layers.12",
+      "model.layers.13",
+      "model.layers.14",
+      "model.layers.15",
+      "model.layers.16",
+      "model.layers.17",
+      "model.layers.18",
+      "model.layers.19",
+      "model.layers.20"
+    ],
+    "late_layers": [
+      "model.layers.21",
+      "model.layers.22",
+      "model.layers.23",
+      "model.layers.24",
+      "model.layers.25",
+      "model.layers.26",
+      "model.layers.27",
+      "model.layers.28",
+      "model.layers.29",
+      "model.layers.30",
+      "model.layers.31"
+    ]
+  },
+  "format_comparison": {
+    "format_importance": {
+      "numeric": {
+        "model.layers.0": 0.97,
+        "model.layers.1": 0.97,
+        "model.layers.10": 0.97,
+        "model.layers.11": 0.97,
+        "model.layers.12": 0.97,
+        "model.layers.13": 0.97,
+        "model.layers.14": 0.97,
+        "model.layers.15": 0.97,
+        "model.layers.16": 0.97,
+        "model.layers.17": 0.97,
+        "model.layers.18": 0.97,
+        "model.layers.19": 0.97,
+        "model.layers.2": 0.97,
+        "model.layers.20": 0.97,
+        "model.layers.21": 0.97,
+        "model.layers.22": 0.97,
+        "model.layers.23": 0.97,
+        "model.layers.24": 0.97,
+        "model.layers.25": 0.97,
+        "model.layers.26": 0.97,
+        "model.layers.27": 0.97,
+        "model.layers.28": 0.97,
+        "model.layers.29": 0.97,
+        "model.layers.3": 0.97,
+        "model.layers.30": 0.97,
+        "model.layers.31": 0.97,
+        "model.layers.4": 0.97,
+        "model.layers.5": 0.97,
+        "model.layers.6": 0.97,
+        "model.layers.7": 0.97,
+        "model.layers.8": 0.97,
+        "model.layers.9": 0.97
+      },
+      "english": {
+        "model.layers.0": 0.29,
+        "model.layers.1": 0.29,
+        "model.layers.10": 0.29,
+        "model.layers.11": 0.29,
+        "model.layers.12": 0.29,
+        "model.layers.13": 0.29,
+        "model.layers.14": 0.29,
+        "model.layers.15": 0.29,
+        "model.layers.16": 0.29,
+        "model.layers.17": 0.29,
+        "model.layers.18": 0.29,
+        "model.layers.19": 0.29,
+        "model.layers.2": 0.29,
+        "model.layers.20": 0.29,
+        "model.layers.21": 0.29,
+        "model.layers.22": 0.29,
+        "model.layers.23": 0.29,
+        "model.layers.24": 0.29,
+        "model.layers.25": 0.29,
+        "model.layers.26": 0.29,
+        "model.layers.27": 0.29,
+        "model.layers.28": 0.29,
+        "model.layers.29": 0.29,
+        "model.layers.3": 0.29,
+        "model.layers.30": 0.29,
+        "model.layers.31": 0.29,
+        "model.layers.4": 0.29,
+        "model.layers.5": 0.29,
+        "model.layers.6": 0.29,
+        "model.layers.7": 0.29,
+        "model.layers.8": 0.29,
+        "model.layers.9": 0.29
+      },
+      "spanish": {
+        "model.layers.0": 0.32,
+        "model.layers.1": 0.32,
+        "model.layers.10": 0.32,
+        "model.layers.11": 0.32,
+        "model.layers.12": 0.32,
+        "model.layers.13": 0.32,
+        "model.layers.14": 0.32,
+        "model.layers.15": 0.32,
+        "model.layers.16": 0.32,
+        "model.layers.17": 0.32,
+        "model.layers.18": 0.32,
+        "model.layers.19": 0.32,
+        "model.layers.2": 0.32,
+        "model.layers.20": 0.32,
+        "model.layers.21": 0.32,
+        "model.layers.22": 0.32,
+        "model.layers.23": 0.32,
+        "model.layers.24": 0.32,
+        "model.layers.25": 0.32,
+        "model.layers.26": 0.32,
+        "model.layers.27": 0.32,
+        "model.layers.28": 0.32,
+        "model.layers.29": 0.32,
+        "model.layers.3": 0.32,
+        "model.layers.30": 0.32,
+        "model.layers.31": 0.32,
+        "model.layers.4": 0.32,
+        "model.layers.5": 0.32,
+        "model.layers.6": 0.32,
+        "model.layers.7": 0.32,
+        "model.layers.8": 0.32,
+        "model.layers.9": 0.32
+      },
+      "italian": {
+        "model.layers.0": 0.41,
+        "model.layers.1": 0.41,
+        "model.layers.10": 0.41,
+        "model.layers.11": 0.41,
+        "model.layers.12": 0.41,
+        "model.layers.13": 0.41,
+        "model.layers.14": 0.41,
+        "model.layers.15": 0.41,
+        "model.layers.16": 0.41,
+        "model.layers.17": 0.41,
+        "model.layers.18": 0.41,
+        "model.layers.19": 0.41,
+        "model.layers.2": 0.41,
+        "model.layers.20": 0.41,
+        "model.layers.21": 0.41,
+        "model.layers.22": 0.41,
+        "model.layers.23": 0.41,
+        "model.layers.24": 0.41,
+        "model.layers.25": 0.41,
+        "model.layers.26": 0.41,
+        "model.layers.27": 0.41,
+        "model.layers.28": 0.41,
+        "model.layers.29": 0.41,
+        "model.layers.3": 0.41,
+        "model.layers.30": 0.41,
+        "model.layers.31": 0.41,
+        "model.layers.4": 0.41,
+        "model.layers.5": 0.41,
+        "model.layers.6": 0.41,
+        "model.layers.7": 0.41,
+        "model.layers.8": 0.41,
+        "model.layers.9": 0.41
+      }
+    },
+    "correlations": {
+      "numeric_vs_english": NaN,
+      "numeric_vs_spanish": NaN,
+      "numeric_vs_italian": NaN,
+      "english_vs_spanish": NaN,
+      "english_vs_italian": NaN,
+      "spanish_vs_italian": NaN
+    },
+    "common_layers": [
+      "model.layers.13",
+      "model.layers.16",
+      "model.layers.28",
+      "model.layers.21",
+      "model.layers.9",
+      "model.layers.15",
+      "model.layers.7",
+      "model.layers.0",
+      "model.layers.26",
+      "model.layers.14",
+      "model.layers.31",
+      "model.layers.5",
+      "model.layers.24",
+      "model.layers.25",
+      "model.layers.30",
+      "model.layers.6",
+      "model.layers.3",
+      "model.layers.4",
+      "model.layers.29",
+      "model.layers.1",
+      "model.layers.22",
+      "model.layers.27",
+      "model.layers.11",
+      "model.layers.12",
+      "model.layers.8",
+      "model.layers.2",
+      "model.layers.20",
+      "model.layers.10",
+      "model.layers.23",
+      "model.layers.19",
+      "model.layers.18",
+      "model.layers.17"
+    ]
+  },
+  "error_fixing": {
+    "fix_rates": {
+      "model.layers.0": 0.0,
+      "model.layers.1": 0.0,
+      "model.layers.10": 0.0,
+      "model.layers.11": 0.0,
+      "model.layers.12": 0.0,
+      "model.layers.13": 0.0,
+      "model.layers.14": 0.0,
+      "model.layers.15": 0.0,
+      "model.layers.16": 0.0,
+      "model.layers.17": 0.0,
+      "model.layers.18": 0.0,
+      "model.layers.19": 0.0,
+      "model.layers.2": 0.0,
+      "model.layers.20": 0.0,
+      "model.layers.21": 0.0,
+      "model.layers.22": 0.0,
+      "model.layers.23": 0.0,
+      "model.layers.24": 0.0,
+      "model.layers.25": 0.0,
+      "model.layers.26": 0.0,
+      "model.layers.27": 0.0,
+      "model.layers.28": 0.0,
+      "model.layers.29": 0.0,
+      "model.layers.3": 0.0,
+      "model.layers.30": 0.0,
+      "model.layers.31": 0.0,
+      "model.layers.4": 0.0,
+      "model.layers.5": 0.0,
+      "model.layers.6": 0.0,
+      "model.layers.7": 0.0,
+      "model.layers.8": 0.0,
+      "model.layers.9": 0.0
+    },
+    "total_errors_analyzed": 3200
+  },
+  "differentiating_circuits": {
+    "differentiating_layers": {
+      "numeric": {
+        "model.layers.13": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.16": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.28": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.21": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.9": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.15": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.7": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.0": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.26": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.14": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.31": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.5": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.24": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.25": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.30": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.6": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.3": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.4": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.29": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.1": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.22": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.27": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.11": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.12": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.8": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.2": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.20": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.10": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.23": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.19": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.18": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        },
+        "model.layers.17": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.97,
+          "difference": 0.97
+        }
+      },
+      "english": {
+        "model.layers.13": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.16": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.28": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.21": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.9": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.15": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.7": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.0": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.26": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.14": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.31": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.5": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.24": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.25": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.30": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.6": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.3": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.4": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.29": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.1": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.22": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.27": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.11": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.12": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.8": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.2": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.20": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.10": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.23": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.19": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.18": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        },
+        "model.layers.17": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.29,
+          "difference": 0.29
+        }
+      },
+      "spanish": {
+        "model.layers.13": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.16": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.28": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.21": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.9": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.15": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.7": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.0": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.26": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.14": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.31": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.5": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.24": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.25": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.30": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.6": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.3": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.4": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.29": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.1": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.22": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.27": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.11": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.12": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.8": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.2": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.20": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.10": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.23": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.19": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.18": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        },
+        "model.layers.17": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.32,
+          "difference": 0.32
+        }
+      },
+      "italian": {
+        "model.layers.13": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.16": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.28": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.21": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.9": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.15": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.7": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.0": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.26": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.14": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.31": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.5": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.24": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.25": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.30": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.6": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.3": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.4": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.29": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.1": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.22": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.27": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.11": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.12": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.8": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.2": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.20": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.10": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.23": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.19": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.18": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        },
+        "model.layers.17": {
+          "correct_importance": 0,
+          "incorrect_importance": 0.41,
+          "difference": 0.41
+        }
+      }
+    },
+    "common_differentiating_layers": [
+      "model.layers.7",
+      "model.layers.0",
+      "model.layers.13",
+      "model.layers.16",
+      "model.layers.28",
+      "model.layers.26",
+      "model.layers.14",
+      "model.layers.21",
+      "model.layers.9",
+      "model.layers.15"
+    ]
+  }
+}

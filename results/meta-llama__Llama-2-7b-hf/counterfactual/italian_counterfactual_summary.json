@@ -1,0 +1,11 @@
+{
+  "model": "meta-llama/Llama-2-7b-hf",
+  "dataset": "italian",
+  "mode": "counterfactual",
+  "accuracy_x": 0.01,
+  "accuracy_x_prime": 0.0,
+  "correct_x": 1,
+  "correct_x_prime": 0,
+  "total": 100,
+  "timestamp": "2026-02-18T00:00:30.345991"
+}
