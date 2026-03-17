@@ -114,7 +114,7 @@ class ArithmeticEAPDataset(Dataset):
         return clean, corrupted, label
 
     def to_dataloader(self, batch_size: int):
-        return DataLoader(self, batch_size=batch_size, collate_fn=collate_eap, shuffle=True)
+        return DataLoader(self, batch_size=batch_size, collate_fn=collate_eap, shuffle=False)
 
 
 def get_logit_positions(logits: torch.Tensor, input_length: torch.Tensor):
@@ -343,17 +343,16 @@ def _extract_circuit_layers(g, graph_json_path: Path = None) -> list:
     (and raw node names) so downstream (Grad-CAM, viz) can identify relevant layers.
     """
     raw_names = []
-    # Try graph internals (EAP Graph may expose nodes with names)
-    for attr in ('included_nodes', 'nodes', 'included'):
-        val = getattr(g, attr, None)
-        if val is not None:
-            iterable = val if isinstance(val, (list, tuple)) else [val]
-            for n in iterable:
-                name = n.get('name', n) if isinstance(n, dict) else str(n)
-                if name and name not in raw_names:
-                    raw_names.append(name)
-            if raw_names:
-                break
+    # Prefer graph internals: g.nodes is a Dict[str, Node] with .in_graph flag
+    nodes = getattr(g, "nodes", None)
+    if isinstance(nodes, dict):
+        for name, node in nodes.items():
+            try:
+                in_graph = getattr(node, "in_graph", True)
+            except Exception:
+                in_graph = True
+            if in_graph and name and name not in raw_names:
+                raw_names.append(name)
     # Fallback: load from saved JSON
     if not raw_names and graph_json_path and graph_json_path.exists():
         with open(graph_json_path) as f:
@@ -379,8 +378,8 @@ def main():
         description='Circuit analysis using EAP-IG (same method as hannamw/EAP-IG)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument('--model', type=str, default='meta-llama/Meta-Llama-3-8B',
-                        help='Model (e.g. meta-llama/Meta-Llama-3-8B, gpt2-small)')
+    parser.add_argument('--model', type=str, default='meta-llama/Llama-2-7b-hf',
+                        help='Model (e.g. meta-llama/Llama-2-7b-hf, gpt2-small)')
     parser.add_argument('--dataset', type=str, default='numeric',
                         choices=list(COUNTERFACTUAL_DATASETS.keys()),
                         help='Dataset to analyze')
