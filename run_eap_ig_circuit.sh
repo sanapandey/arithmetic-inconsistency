@@ -4,8 +4,8 @@
 # Requires: pip install transformer_lens; pip install git+https://github.com/hannamw/EAP-IG
 # Optional: pip install pygraphviz  (for circuit graph visualization)
 
-# Default: Llama 3 8B (set MODEL=gpt2-small for a quick CPU-friendly run)
-MODEL="${1:-meta-llama/Meta-Llama-3-8B}"
+# Default: Llama 3.1 8B (same as run_all_circuits.py; set MODEL=gpt2-small for a quick CPU run)
+MODEL="${1:-meta-llama/Llama-3.1-8B}"
 DATASET="${2:-numeric}"
 MAX_SAMPLES="${3:-100}"
 

@@ -92,11 +92,14 @@ def check_label_token_diff_for_dataset(
             if len(examples_with_same) < 5:
                 examples_with_same.append((it.get("id", "NA"), y, y_prime))
 
-    print(
-        f"[{dataset_type}] {n_same_first_token}/{n_total} "
-        f"examples ({n_same_first_token / n_total:.1%}) "
-        f"have identical first label token IDs (y vs y')."
-    )
+    pct_same = n_same_first_token / n_total
+    if n_same_first_token == 0:
+        print(f"[{dataset_type}] All {n_total} examples have distinct first label tokens (y vs y') — logit_diff is well-defined.")
+    else:
+        print(
+            f"[{dataset_type}] WARNING: {n_same_first_token}/{n_total} examples ({pct_same:.1%}) "
+            f"have identical first label token IDs (y vs y'); logit_diff will be zero for those."
+        )
     if examples_with_same:
         print(f"[{dataset_type}] Example cases where first tokens match:")
         for ex_id, y, y_prime in examples_with_same:
@@ -105,7 +108,7 @@ def check_label_token_diff_for_dataset(
 
 
 def run_all_circuit_analyses(
-    model_name: str = "meta-llama/Llama-2-7b-hf",
+    model_name: str = "meta-llama/Llama-3.1-8B",
     split: str = "test",
     max_samples: int = 100,
     batch_size: int = 10,

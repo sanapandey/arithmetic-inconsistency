@@ -1,0 +1,4 @@
+**/eap_graph.pt filter=lfs diff=lfs merge=lfs -text
+**/C_arith.json !text -filter -merge -diff
+analysis_output/**/*.json filter=lfs diff=lfs merge=lfs -text
+analysis_output/**/*.png filter=lfs diff=lfs merge=lfs -text

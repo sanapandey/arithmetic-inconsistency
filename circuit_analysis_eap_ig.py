@@ -16,8 +16,8 @@ Requires:
   # Note: PyPI "eap" is a different package. Use the EAP-IG repo.
 Optional: pip install pygraphviz  (for circuit graph visualization)
 
-Supported models: gpt2-small, gpt2-medium, meta-llama/Meta-Llama-3-8B, etc. (transformer_lens compatible).
-For Llama 3 8B, use --model meta-llama/Meta-Llama-3-8B (default).
+Supported models: gpt2-small, gpt2-medium, meta-llama/Llama-3.1-8B, etc. (transformer_lens compatible).
+Default matches run_all_circuits.py: meta-llama/Llama-3.1-8B.
 
 Output: C_arith.json, eap_graph.json, analysis_output/ compatible with rest of pipeline.
 """
@@ -81,11 +81,24 @@ class ArithmeticEAPDataset(Dataset):
     Else: label = token id of correct answer (y) only.
     """
 
-    def __init__(self, items, tokenizer, use_logit_diff: bool = True):
-        self.items = items
+    def __init__(self, items, tokenizer, use_logit_diff: bool = True, filter_length_mismatch: bool = True):
         self.tokenizer = tokenizer
         self.use_logit_diff = use_logit_diff
         self._label_cache = {}
+        # EAP-IG requires clean/corrupted to have same token count; filter mismatched pairs
+        if filter_length_mismatch:
+            filtered = []
+            for item in items:
+                clean_ids = tokenizer.encode(str(item["x"]).strip(), add_special_tokens=False)
+                corrupt_ids = tokenizer.encode(str(item["x_prime"]).strip(), add_special_tokens=False)
+                if len(clean_ids) == len(corrupt_ids):
+                    filtered.append(item)
+                # else: skip (e.g. Italian "meno" vs "più" tokenize to different lengths)
+            self.items = filtered
+            if filtered and len(filtered) < len(items):
+                print(f"Filtered {len(items) - len(filtered)} samples with clean/corrupted length mismatch")
+        else:
+            self.items = items
 
     def __len__(self):
         return len(self.items)
@@ -246,6 +259,11 @@ def run_eap_ig_circuit_analysis(
 
     # Build dataloader and metric (logit_diff for correct vs incorrect generalization)
     ds = ArithmeticEAPDataset(items, model.tokenizer, use_logit_diff=use_logit_diff)
+    if len(ds) == 0:
+        raise ValueError(
+            f"No samples with matching clean/corrupted token lengths for {dataset_type}. "
+            "EAP-IG requires aligned sequences (e.g. Italian 'meno' vs 'più' can tokenize differently)."
+        )
     dataloader = ds.to_dataloader(batch_size)
     metric = get_arithmetic_metric(model.tokenizer, use_logit_diff=use_logit_diff)
 
@@ -310,6 +328,16 @@ def run_eap_ig_circuit_analysis(
         print(f"Saved circuit visualization to {img_path}")
     except ImportError:
         print("Install pygraphviz for circuit visualization: pip install pygraphviz")
+    except ValueError as e:
+        # Log diagnostics when viz fails (e.g. "Number of positions must match")
+        import traceback
+        print(f"Graph image failed ({dataset_type}): {e}")
+        print(f"  Circuit stats: {n_nodes} nodes, {n_edges} edges")
+        nodes = getattr(g, "nodes", None)
+        if isinstance(nodes, dict):
+            names = list(nodes.keys())[:20]
+            print(f"  Sample node names: {names}")
+        traceback.print_exc()
 
     return c_arith
 
@@ -378,8 +406,8 @@ def main():
         description='Circuit analysis using EAP-IG (same method as hannamw/EAP-IG)',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument('--model', type=str, default='meta-llama/Llama-2-7b-hf',
-                        help='Model (e.g. meta-llama/Llama-2-7b-hf, gpt2-small)')
+    parser.add_argument('--model', type=str, default='meta-llama/Llama-3.1-8B',
+                        help='Model (e.g. meta-llama/Llama-3.1-8B, gpt2-small)')
     parser.add_argument('--dataset', type=str, default='numeric',
                         choices=list(COUNTERFACTUAL_DATASETS.keys()),
                         help='Dataset to analyze')
