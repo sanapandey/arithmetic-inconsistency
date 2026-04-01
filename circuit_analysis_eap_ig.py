@@ -8,7 +8,9 @@ Matches the approach in https://github.com/hannamw/EAP-IG (ioi.ipynb):
 - Gradient-based edge attribution (EAP or EAP-IG-inputs)
 - Graph-based circuit extraction via apply_topn()
 - For "correct vs incorrect" generalization: labels as [correct_idx, incorrect_idx] and
-  logit_diff metric (correct - incorrect), as in the notebook.
+  logit_diff metric (correct - incorrect), as in the notebook. Continuations y/y_prime in
+  the JSON often include a leading space; label token ids use the first token of the
+  stored string (not str.strip()), so logits align with the true next-token target.
 
 Requires:
   pip install transformer_lens
@@ -59,6 +61,146 @@ from eval_counterfactual import (
 )
 
 
+def continuation_first_token_id(tokenizer, text) -> int:
+    """
+    First token id for the answer continuation as stored in the dataset.
+
+    Counterfactual JSON uses leading spaces on y / y_prime (e.g. " 22", " twenty-two")
+    so the first predicted token after the prompt is often SPACE, not the digit/word.
+    Stripping before encoding (old behavior) swapped in the wrong vocab ids for
+    logit_diff(correct - incorrect).
+    """
+    if text is None:
+        return 0
+    s = str(text)
+    if not s.strip():
+        return 0
+    ids = tokenizer.encode(s, add_special_tokens=False)
+    return ids[0] if ids else 0
+
+
+def filter_length_aligned_items(items, tokenizer):
+    """Same rule as ArithmeticEAPDataset: keep pairs where clean and corrupted tokenize to same length."""
+    filtered = []
+    for item in items:
+        clean_ids = tokenizer.encode(str(item["x"]).strip(), add_special_tokens=False)
+        corrupt_ids = tokenizer.encode(str(item["x_prime"]).strip(), add_special_tokens=False)
+        if len(clean_ids) == len(corrupt_ids):
+            filtered.append(item)
+    if items and len(filtered) < len(items):
+        print(f"Filtered {len(items) - len(filtered)} samples with clean/corrupted length mismatch")
+    return filtered
+
+
+def stripped_first_token_id(tokenizer, text) -> int:
+    """Previous label convention: first token after .strip() on y (can mismatch real continuation)."""
+    if text is None or not str(text).strip():
+        return 0
+    ids = tokenizer.encode(str(text).strip(), add_special_tokens=False)
+    return ids[0] if ids else 0
+
+
+def filter_items_model_first_token_correct(model, items, tokenizer):
+    """
+    Keep only items where argmax at the last prompt position matches the first token id
+    of the correct continuation y (same convention as continuation_first_token_id).
+    Skips items with degenerate labels (same first token for y and y') or missing ids.
+    """
+    kept = []
+    n_wrong = 0
+    n_degenerate = 0
+    n_bad_id = 0
+    model.eval()
+    for item in items:
+        y = item.get("y", item.get("y_expected", ""))
+        yp = item.get("y_prime", item.get("y_prime_expected", ""))
+        cid = continuation_first_token_id(tokenizer, y)
+        iid = continuation_first_token_id(tokenizer, yp)
+        if cid == 0 or iid == 0:
+            n_bad_id += 1
+            continue
+        if cid == iid:
+            n_degenerate += 1
+            continue
+        text = str(item["x"]).strip()
+        with torch.inference_mode():
+            logits = model(text)
+        pred = logits[0, -1].argmax().item()
+        if pred == cid:
+            kept.append(item)
+        else:
+            n_wrong += 1
+    print(
+        f"Model first-token filter: kept {len(kept)}/{len(items)} "
+        f"(wrong argmax: {n_wrong}, degenerate y/y' token: {n_degenerate}, bad label id: {n_bad_id})"
+    )
+    if not kept and items:
+        def _dec(tid):
+            try:
+                return tokenizer.decode([tid])
+            except Exception:
+                return "?"
+        print(
+            "  Hint: this filter requires argmax(logits[last]) == first token id of y (see continuation_first_token_id). "
+            "Dataset y values often start with a leading space; the model may still be 'correct' but predict a different "
+            "first token (e.g. a digit/word piece instead of that space token). Use --debug-label-tokenization N to compare."
+        )
+        shown = 0
+        for item in items:
+            if shown >= 3:
+                break
+            y = item.get("y", item.get("y_expected", ""))
+            yp = item.get("y_prime", item.get("y_prime_expected", ""))
+            cid = continuation_first_token_id(tokenizer, y)
+            iid = continuation_first_token_id(tokenizer, yp)
+            if cid == 0 or iid == 0 or cid == iid:
+                continue
+            text = str(item["x"]).strip()
+            with torch.inference_mode():
+                pred = model(text)[0, -1].argmax().item()
+            if pred == cid:
+                continue
+            print(
+                f"  Example id={item.get('id', 'NA')!r}: y={y!r} → label_token={cid} ({_dec(cid)!r}) "
+                f"but argmax={pred} ({_dec(pred)!r})"
+            )
+            shown += 1
+    return kept
+
+
+def print_label_token_debug(model, tokenizer, items, n: int = 8):
+    """Print continuation strings and label token ids vs model argmax (tokenization sanity check)."""
+    n = min(n, len(items))
+    if n <= 0:
+        return
+    print(f"Label token debug (first {n} length-aligned samples):")
+    model.eval()
+    for i in range(n):
+        item = items[i]
+        y = item.get("y", item.get("y_expected", ""))
+        yp = item.get("y_prime", item.get("y_prime_expected", ""))
+        raw_c = continuation_first_token_id(tokenizer, y)
+        raw_i = continuation_first_token_id(tokenizer, yp)
+        strip_c = stripped_first_token_id(tokenizer, y)
+        strip_i = stripped_first_token_id(tokenizer, yp)
+        text = str(item["x"]).strip()
+        with torch.inference_mode():
+            logits = model(text)
+        pred = logits[0, -1].argmax().item()
+        def dec(tid):
+            try:
+                return tokenizer.decode([tid])
+            except Exception:
+                return "?"
+        print(
+            f"  [{i}] id={item.get('id', 'NA')!r}\n"
+            f"      y repr={y!r}  y' repr={yp!r}\n"
+            f"      first_token_id continuation: correct={raw_c} ({dec(raw_c)!r}) incorrect={raw_i} ({dec(raw_i)!r})\n"
+            f"      first_token_id if .strip() y: correct={strip_c} ({dec(strip_c)!r}) incorrect={strip_i} ({dec(strip_i)!r})\n"
+            f"      model argmax last pos: {pred} ({dec(pred)!r})  match_continuation_correct: {pred == raw_c}"
+        )
+
+
 def collate_eap(xs):
     """
     Collate for EAP: (clean, corrupted, labels).
@@ -77,14 +219,14 @@ class ArithmeticEAPDataset(Dataset):
     """
     Adapts counterfactual arithmetic data to EAP format (aligned with ioi.ipynb).
     clean = x, corrupted = x_prime.
-    If use_logit_diff: label = [correct_idx, incorrect_idx] (token ids for y and y_prime).
+    If use_logit_diff: label = [correct_idx, incorrect_idx] = first token ids of continuations
+    y and y_prime as stored (leading spaces preserved; see continuation_first_token_id).
     Else: label = token id of correct answer (y) only.
     """
 
     def __init__(self, items, tokenizer, use_logit_diff: bool = True, filter_length_mismatch: bool = True):
         self.tokenizer = tokenizer
         self.use_logit_diff = use_logit_diff
-        self._label_cache = {}
         # EAP-IG requires clean/corrupted to have same token count; filter mismatched pairs
         if filter_length_mismatch:
             filtered = []
@@ -103,18 +245,12 @@ class ArithmeticEAPDataset(Dataset):
     def __len__(self):
         return len(self.items)
 
-    def _token_to_id(self, text: str):
-        if not (text or str(text).strip()):
-            return 0
-        ids = self.tokenizer.encode(str(text).strip(), add_special_tokens=False)
-        return ids[0] if ids else 0
-
     def _get_label(self, idx):
         item = self.items[idx]
-        y = item.get('y', item.get('y_expected', '')).strip()
-        y_prime = item.get('y_prime', item.get('y_prime_expected', '')).strip()
-        correct_id = self._token_to_id(y)
-        incorrect_id = self._token_to_id(y_prime)
+        y = item.get('y', item.get('y_expected', ''))
+        y_prime = item.get('y_prime', item.get('y_prime_expected', ''))
+        correct_id = continuation_first_token_id(self.tokenizer, y)
+        incorrect_id = continuation_first_token_id(self.tokenizer, y_prime)
         if self.use_logit_diff:
             return [correct_id, incorrect_id]
         return correct_id
@@ -212,6 +348,8 @@ def run_eap_ig_circuit_analysis(
     output_dir: str = 'analysis_output',
     device: str = None,
     use_logit_diff: bool = True,
+    filter_model_correct: bool = True,
+    debug_label_tokenization: int = 0,
 ):
     """
     Run EAP-IG circuit analysis and save results.
@@ -239,6 +377,7 @@ def run_eap_ig_circuit_analysis(
     items = load_counterfactual_dataset(dataset_path, split, max_samples)
     if not items:
         raise ValueError("No samples loaded")
+    n_loaded = len(items)
 
     # Load model (Llama 3 8B: use notebook settings from ioi.ipynb)
     print(f"Loading {model_name} as HookedTransformer...")
@@ -257,13 +396,25 @@ def run_eap_ig_circuit_analysis(
     if hasattr(model.cfg, 'ungroup_grouped_query_attention'):
         model.cfg.ungroup_grouped_query_attention = True
 
-    # Build dataloader and metric (logit_diff for correct vs incorrect generalization)
-    ds = ArithmeticEAPDataset(items, model.tokenizer, use_logit_diff=use_logit_diff)
-    if len(ds) == 0:
+    tokenizer = model.tokenizer
+    items = filter_length_aligned_items(items, tokenizer)
+    if not items:
         raise ValueError(
             f"No samples with matching clean/corrupted token lengths for {dataset_type}. "
             "EAP-IG requires aligned sequences (e.g. Italian 'meno' vs 'più' can tokenize differently)."
         )
+    if debug_label_tokenization > 0:
+        print_label_token_debug(model, tokenizer, items, debug_label_tokenization)
+    if filter_model_correct:
+        items = filter_items_model_first_token_correct(model, items, tokenizer)
+    if not items:
+        raise ValueError(
+            f"No samples left after filtering for {dataset_type}. "
+            "Try --no-filter-model-correct, or increase max_samples."
+        )
+
+    # Build dataloader and metric (logit_diff for correct vs incorrect generalization)
+    ds = ArithmeticEAPDataset(items, tokenizer, use_logit_diff=use_logit_diff, filter_length_mismatch=False)
     dataloader = ds.to_dataloader(batch_size)
     metric = get_arithmetic_metric(model.tokenizer, use_logit_diff=use_logit_diff)
 
@@ -307,6 +458,10 @@ def run_eap_ig_circuit_analysis(
         "method": method,
         "dataset": dataset_type,
         "use_logit_diff": use_logit_diff,
+        "label_tokenization": "continuation_first_token_id",
+        "filter_model_correct": filter_model_correct,
+        "n_samples_loaded": n_loaded,
+        "n_samples_after_filters": len(items),
         "per_format": {dataset_type: circuit_nodes},
         "combined": circuit_nodes,
         "top_n_nodes": top_n,
@@ -427,6 +582,11 @@ def main():
     parser.add_argument('--output-dir', type=str, default='analysis_output')
     parser.add_argument('--device', type=str, default=None,
                         help='Device: cuda, mps, cpu. Use cpu if you get "Torch not compiled with CUDA"')
+    parser.add_argument('--no-filter-model-correct', action='store_true',
+                        help='Use all length-aligned samples, not only those where the model’s '
+                        'argmax at the last prompt position matches the first token of y.')
+    parser.add_argument('--debug-label-tokenization', type=int, default=0, metavar='N',
+                        help='Print label strings and token ids for first N length-aligned samples')
 
     args = parser.parse_args()
 
@@ -451,6 +611,8 @@ def main():
             output_dir=args.output_dir,
             device=args.device,
             use_logit_diff=not args.no_logit_diff,
+            filter_model_correct=not args.no_filter_model_correct,
+            debug_label_tokenization=args.debug_label_tokenization,
         )
         print("\nDone.")
     except ImportError as e:

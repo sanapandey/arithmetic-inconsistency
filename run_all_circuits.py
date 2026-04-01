@@ -12,6 +12,7 @@ import torch
 from transformer_lens import HookedTransformer
 
 from circuit_analysis_eap_ig import (
+    continuation_first_token_id,
     run_eap_ig_circuit_analysis,
 )
 from eval_counterfactual import (
@@ -21,14 +22,6 @@ from eval_counterfactual import (
 
 
 DATASET_TYPES = ["numeric", "english", "spanish", "italian"]
-
-
-def _token_to_id(tokenizer, text: str) -> int:
-    """Match ArithmeticEAPDataset._token_to_id."""
-    if not (text or str(text).strip()):
-        return 0
-    ids = tokenizer.encode(str(text).strip(), add_special_tokens=False)
-    return ids[0] if ids else 0
 
 
 def check_label_token_diff_for_dataset(
@@ -82,11 +75,10 @@ def check_label_token_diff_for_dataset(
     examples_with_same: list[tuple[str, str, str]] = []
 
     for it in items:
-        # Mirror ArithmeticEAPDataset._get_label logic for y / y_prime fields
-        y = it.get("y", it.get("y_expected", "")).strip()
-        y_prime = it.get("y_prime", it.get("y_prime_expected", "")).strip()
-        id_y = _token_to_id(tokenizer, y)
-        id_y_prime = _token_to_id(tokenizer, y_prime)
+        y = it.get("y", it.get("y_expected", ""))
+        y_prime = it.get("y_prime", it.get("y_prime_expected", ""))
+        id_y = continuation_first_token_id(tokenizer, y)
+        id_y_prime = continuation_first_token_id(tokenizer, y_prime)
         if id_y == id_y_prime:
             n_same_first_token += 1
             if len(examples_with_same) < 5:
@@ -118,6 +110,8 @@ def run_all_circuit_analyses(
     output_dir: str = "analysis_output",
     use_logit_diff: bool = True,
     device: str | None = None,
+    filter_model_correct: bool = True,
+    debug_label_tokenization: int = 0,
 ):
     """
     Run EAP-IG circuit analysis on all configured arithmetic datasets,
@@ -153,6 +147,8 @@ def run_all_circuit_analyses(
             output_dir=output_dir,
             device=device,
             use_logit_diff=use_logit_diff,
+            filter_model_correct=filter_model_correct,
+            debug_label_tokenization=debug_label_tokenization,
         )
         print(f"[{dataset_type}] Circuit analysis complete.\n")
 

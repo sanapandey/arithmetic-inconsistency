@@ -1,0 +1,12 @@
+{
+  "model_name": "meta-llama/Llama-2-7b-hf",
+  "dataset": "numeric",
+  "split": "test",
+  "max_samples_requested": 200,
+  "filter_model_correct": false,
+  "n_loaded_from_json": 200,
+  "n_rows_written": 64,
+  "n_skipped_bad_or_degenerate": 136,
+  "label_rule": "continuation_first_token_id",
+  "csv_path": "/Users/sanapandey/arithmetic-dataset/data/eap_frozen/meta-llama__Llama-2-7b-hf__numeric__test__n200__all_aligned.csv"
+}
