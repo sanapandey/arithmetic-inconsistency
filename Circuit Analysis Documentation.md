@@ -152,7 +152,7 @@ EAP-IG-inputs (this repo’s default: `--method EAP-IG-inputs`) uses integrated 
 
 ### 6.3 Task metric: `logit_diff` (IOI-style)
 
-The IOI demo uses a two-token supervision signal: maximize the logit gap between a correct and incorrect token at the prediction position. In `[circuit_analysis_eap_ig.py](circuit_analysis_eap_ig.py)` this is implemented as `**logit_diff`** at the last prompt position:
+The IOI demo uses a two-token supervision signal: maximize the logit gap between a correct and incorrect token at the prediction position. In `circuit_analysis_eap_ig.py` this is implemented as `logit_diff` at the last prompt position:
 
 \text{metric} = \text{logit}[\text{correctidx}] - \text{logit}[\text{incorrectidx}]
 
@@ -201,7 +201,7 @@ EAP-IG in this setup assumes clean and corrupted prompts tokenize to the same le
 
 ### 8.3 Label tokenization: `continuation_first_token_id`
 
-Answers in JSON often start with a leading space (e.g. `" 22"`). The first token id of the string as stored is the correct supervision target for the first generated token after the prompt. Stripping before `encode` can swap in the wrong token id and break `**logit_diff`**.
+Answers in JSON often start with a leading space (e.g. `" 22"`). The first token id of the string as stored is the correct supervision target for the first generated token after the prompt. Stripping before `encode` can swap in the wrong token id and break `logit_diff`.
 
 ### 8.4 Optional filter: `filter_model_correct` (default: on)
 
