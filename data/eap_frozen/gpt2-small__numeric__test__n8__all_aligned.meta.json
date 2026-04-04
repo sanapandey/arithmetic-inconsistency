@@ -1,0 +1,12 @@
+{
+  "model_name": "gpt2-small",
+  "dataset": "numeric",
+  "split": "test",
+  "max_samples_requested": 8,
+  "filter_model_correct": false,
+  "n_loaded_from_json": 8,
+  "n_rows_written": 8,
+  "n_skipped_bad_or_degenerate": 0,
+  "label_rule": "continuation_first_token_id",
+  "csv_path": "/Users/sanapandey/arithmetic-dataset/data/eap_frozen/gpt2-small__numeric__test__n8__all_aligned.csv"
+}

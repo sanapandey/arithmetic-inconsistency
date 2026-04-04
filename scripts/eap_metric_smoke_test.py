@@ -116,25 +116,6 @@ def main():
         return sum(xs) / len(xs) if xs else float("nan")
 
     print()
-    print("What this measures")
-    print("-" * 60)
-    print(
-        "For each prompt, we take logits at the LAST input token (the position where the "
-        "next token is predicted). We compare two vocab indices:\n"
-        "  • 'correct' = first token id of the dataset continuation y (e.g. space before '22')\n"
-        "  • 'incorrect' = first token id of the counterfactual continuation y'\n"
-        "\n"
-        "logit_diff = logit(correct) − logit(incorrect)  (raw logits, no softmax).\n"
-        "  • Positive  → higher score on the correct continuation's first token than on y_prime's.\n"
-        "  • Negative  → the model assigns higher raw logit to y_prime's first token than to y's.\n"
-        "\n"
-        "This is only a one-step, first-token comparison; it is not full greedy decoding.\n"
-        "With --filter-model-correct (default), we only average over rows where the model's "
-        "argmax at that position already matches y's first token, so the pairwise diff is "
-        "interpretable as how much higher the logit is on y's token than on y_prime's, "
-        "among problems where the model already picks y's first token."
-    )
-    print("-" * 60)
     print(f"Loaded up to {args.max_samples} rows; length-aligned: {n_after_len}; "
           f"after model-correct filter: {len(items)} (filter={'on' if filter_model_correct else 'off'})")
     print()

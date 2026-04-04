@@ -61,6 +61,41 @@ from eval_counterfactual import (
 )
 
 
+def default_eap_device() -> str:
+    """cuda / mps / cpu for HookedTransformer (same resolution everywhere in this stack)."""
+    return (
+        "cuda"
+        if torch.cuda.is_available()
+        else "mps"
+        if torch.backends.mps.is_available()
+        else "cpu"
+    )
+
+
+def load_hooked_arithmetic_lm(model_name: str, device: str):
+    """
+    Single place for HookedTransformer load + TL flags used with EAP-IG (ioi-style Llama setup).
+    """
+    if HookedTransformer is None:
+        raise ImportError("Install transformer_lens: pip install transformer_lens")
+    print(f"Loading {model_name} as HookedTransformer...")
+    load_kw = dict(device=device)
+    if "llama" in model_name.lower() or "Llama" in model_name or "meta-llama" in model_name:
+        load_kw.update(
+            center_writing_weights=False,
+            center_unembed=False,
+            fold_ln=False,
+            dtype=torch.float16 if device != "cpu" else torch.float32,
+        )
+    model = HookedTransformer.from_pretrained(model_name, **load_kw)
+    model.cfg.use_split_qkv_input = True
+    model.cfg.use_attn_result = True
+    model.cfg.use_hook_mlp_in = True
+    if hasattr(model.cfg, "ungroup_grouped_query_attention"):
+        model.cfg.ungroup_grouped_query_attention = True
+    return model
+
+
 def continuation_first_token_id(tokenizer, text) -> int:
     """
     First token id for the answer continuation as stored in the dataset.
@@ -227,18 +262,8 @@ class ArithmeticEAPDataset(Dataset):
     def __init__(self, items, tokenizer, use_logit_diff: bool = True, filter_length_mismatch: bool = True):
         self.tokenizer = tokenizer
         self.use_logit_diff = use_logit_diff
-        # EAP-IG requires clean/corrupted to have same token count; filter mismatched pairs
         if filter_length_mismatch:
-            filtered = []
-            for item in items:
-                clean_ids = tokenizer.encode(str(item["x"]).strip(), add_special_tokens=False)
-                corrupt_ids = tokenizer.encode(str(item["x_prime"]).strip(), add_special_tokens=False)
-                if len(clean_ids) == len(corrupt_ids):
-                    filtered.append(item)
-                # else: skip (e.g. Italian "meno" vs "più" tokenize to different lengths)
-            self.items = filtered
-            if filtered and len(filtered) < len(items):
-                print(f"Filtered {len(items) - len(filtered)} samples with clean/corrupted length mismatch")
+            self.items = filter_length_aligned_items(items, tokenizer)
         else:
             self.items = items
 
@@ -350,9 +375,13 @@ def run_eap_ig_circuit_analysis(
     use_logit_diff: bool = True,
     filter_model_correct: bool = True,
     debug_label_tokenization: int = 0,
+    model=None,
 ):
     """
     Run EAP-IG circuit analysis and save results.
+
+    If ``model`` is provided (e.g. from ``load_hooked_arithmetic_lm``), it is reused and
+    not loaded again; must match ``model_name``'s vocabulary.
 
     Returns:
         dict with circuit, graph info, baseline/circuit performance
@@ -360,14 +389,16 @@ def run_eap_ig_circuit_analysis(
     if HookedTransformer is None:
         raise ImportError("Install transformer_lens: pip install transformer_lens")
     if Graph is None or attribute is None:
-        raise ImportError("Install eap: pip install eap")
+        raise ImportError(
+            "Install EAP-IG (PyPI package 'eap' is different): "
+            "pip install git+https://github.com/hannamw/EAP-IG"
+        )
 
     output_path = Path(output_dir) / dataset_type
     output_path.mkdir(parents=True, exist_ok=True)
 
-    # Device
     if device is None:
-        device = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+        device = default_eap_device()
 
     # Load dataset
     dataset_path = COUNTERFACTUAL_DATASETS.get(dataset_type)
@@ -379,23 +410,8 @@ def run_eap_ig_circuit_analysis(
         raise ValueError("No samples loaded")
     n_loaded = len(items)
 
-    # Load model (Llama 3 8B: use notebook settings from ioi.ipynb)
-    print(f"Loading {model_name} as HookedTransformer...")
-    load_kw = dict(device=device)
-    if 'llama' in model_name.lower() or 'Llama' in model_name or 'meta-llama' in model_name:
-        load_kw.update(
-            center_writing_weights=False,
-            center_unembed=False,
-            fold_ln=False,
-            dtype=torch.float16 if device != 'cpu' else torch.float32,
-        )
-    model = HookedTransformer.from_pretrained(model_name, **load_kw)
-    model.cfg.use_split_qkv_input = True
-    model.cfg.use_attn_result = True
-    model.cfg.use_hook_mlp_in = True
-    if hasattr(model.cfg, 'ungroup_grouped_query_attention'):
-        model.cfg.ungroup_grouped_query_attention = True
-
+    if model is None:
+        model = load_hooked_arithmetic_lm(model_name, device)
     tokenizer = model.tokenizer
     items = filter_length_aligned_items(items, tokenizer)
     if not items:
@@ -617,7 +633,7 @@ def main():
         print("\nDone.")
     except ImportError as e:
         print("Missing dependency:", e)
-        print("Install with: pip install transformer_lens eap")
+        print("Install with: pip install transformer_lens git+https://github.com/hannamw/EAP-IG")
         raise SystemExit(1)
     except Exception as e:
         print("Error:", e)

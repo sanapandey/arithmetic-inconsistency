@@ -20,6 +20,13 @@ import csv
 import json
 import sys
 import os
+from pathlib import Path
+
+# Repo root on sys.path (script may live under smoke_tests/)
+_REPO_DIR = Path(__file__).resolve().parent
+_REPO_ROOT = _REPO_DIR if (_REPO_DIR / "eval_counterfactual.py").is_file() else _REPO_DIR.parent
+sys.path.insert(0, str(_REPO_ROOT))
+
 if "--device" in sys.argv:
     try:
         i = sys.argv.index("--device")
@@ -29,7 +36,6 @@ if "--device" in sys.argv:
         pass
 
 from functools import partial
-from pathlib import Path
 from typing import List, Optional
 
 import torch
@@ -48,14 +54,16 @@ from eval_counterfactual import (
 from circuit_analysis_eap_ig import (
     collate_eap,
     continuation_first_token_id,
+    default_eap_device,
     filter_items_model_first_token_correct,
     filter_length_aligned_items,
     get_arithmetic_metric,
+    load_hooked_arithmetic_lm,
     print_label_token_debug,
     _extract_circuit_layers,
 )
 
-FROZEN_CSV_ROOT = Path(__file__).resolve().parent / "data" / "eap_frozen"
+FROZEN_CSV_ROOT = _REPO_ROOT / "data" / "eap_frozen"
 
 CSV_FIELDS = [
     "problem_id",
@@ -235,13 +243,16 @@ def run_eap_ig_circuit_analysis_frozen(
             from eap.evaluate import evaluate_graph, evaluate_baseline
             from eap.attribute import attribute
         except ImportError:
-            raise ImportError("Install eap: pip install git+https://github.com/hannamw/EAP-IG")
+            raise ImportError(
+                "Install EAP-IG (PyPI package 'eap' is different): "
+                "pip install git+https://github.com/hannamw/EAP-IG"
+            )
 
     output_path = Path(output_dir) / dataset_type
     output_path.mkdir(parents=True, exist_ok=True)
 
     if device is None:
-        device = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+        device = default_eap_device()
 
     dataset_path = COUNTERFACTUAL_DATASETS.get(dataset_type)
     if not dataset_path or not Path(dataset_path).exists():
@@ -252,22 +263,7 @@ def run_eap_ig_circuit_analysis_frozen(
         raise ValueError("No samples loaded")
     n_loaded = len(items)
 
-    print(f"Loading {model_name} as HookedTransformer...")
-    load_kw = dict(device=device)
-    if "llama" in model_name.lower() or "Llama" in model_name or "meta-llama" in model_name:
-        load_kw.update(
-            center_writing_weights=False,
-            center_unembed=False,
-            fold_ln=False,
-            dtype=torch.float16 if device != "cpu" else torch.float32,
-        )
-    model = HookedTransformer.from_pretrained(model_name, **load_kw)
-    model.cfg.use_split_qkv_input = True
-    model.cfg.use_attn_result = True
-    model.cfg.use_hook_mlp_in = True
-    if hasattr(model.cfg, "ungroup_grouped_query_attention"):
-        model.cfg.ungroup_grouped_query_attention = True
-
+    model = load_hooked_arithmetic_lm(model_name, device)
     tokenizer = model.tokenizer
     items = filter_length_aligned_items(items, tokenizer)
     if not items:

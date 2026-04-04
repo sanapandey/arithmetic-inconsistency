@@ -5,14 +5,13 @@ sanity-check that the logit-diff labels are non-degenerate
 (i.e. first tokens for y and y' are not identical).
 """
 
-from functools import partial
 from pathlib import Path
-
-import torch
-from transformer_lens import HookedTransformer
+from typing import List, Optional, Tuple
 
 from circuit_analysis_eap_ig import (
     continuation_first_token_id,
+    default_eap_device,
+    load_hooked_arithmetic_lm,
     run_eap_ig_circuit_analysis,
 )
 from eval_counterfactual import (
@@ -25,45 +24,23 @@ DATASET_TYPES = ["numeric", "english", "spanish", "italian"]
 
 
 def check_label_token_diff_for_dataset(
-    model_name: str,
+    tokenizer,
     dataset_type: str,
     split: str = "test",
     max_samples: int = 100,
-    device: str | None = None,
 ) -> None:
     """
     For a given dataset, report how often the first token IDs for y and y'
     (or y_expected / y_prime_expected) are identical. In those cases,
     logit_diff(correct - incorrect) is structurally zero.
+
+    Only needs the tokenizer (same vocab as the model used for circuit analysis).
     """
 
     dataset_path = COUNTERFACTUAL_DATASETS.get(dataset_type)
     if not dataset_path or not Path(dataset_path).exists():
         print(f"[{dataset_type}] Dataset not found at {dataset_path}")
         return
-
-    # Device
-    if device is None:
-        device = (
-            "cuda"
-            if torch.cuda.is_available()
-            else "mps"
-            if torch.backends.mps.is_available()
-            else "cpu"
-        )
-
-    # Load model *only* to get the tokenizer
-    print(f"[{dataset_type}] Loading {model_name} to check labels...")
-    load_kw = dict(device=device)
-    if "llama" in model_name.lower() or "Llama" in model_name or "meta-llama" in model_name:
-        load_kw.update(
-            center_writing_weights=False,
-            center_unembed=False,
-            fold_ln=False,
-            dtype=torch.float16 if device != "cpu" else torch.float32,
-        )
-    model = HookedTransformer.from_pretrained(model_name, **load_kw)
-    tokenizer = model.tokenizer
 
     items = load_counterfactual_dataset(dataset_path, split, max_samples)
     if not items:
@@ -72,7 +49,7 @@ def check_label_token_diff_for_dataset(
 
     n_total = len(items)
     n_same_first_token = 0
-    examples_with_same: list[tuple[str, str, str]] = []
+    examples_with_same: List[Tuple[str, str, str]] = []
 
     for it in items:
         y = it.get("y", it.get("y_expected", ""))
@@ -109,7 +86,7 @@ def run_all_circuit_analyses(
     top_n: int = 20000,
     output_dir: str = "analysis_output",
     use_logit_diff: bool = True,
-    device: str | None = None,
+    device: Optional[str] = None,
     filter_model_correct: bool = True,
     debug_label_tokenization: int = 0,
 ):
@@ -119,6 +96,10 @@ def run_all_circuit_analyses(
     first token ID (which would force logit_diff to zero).
     """
 
+    if device is None:
+        device = default_eap_device()
+    model = load_hooked_arithmetic_lm(model_name, device)
+
     for dataset_type in DATASET_TYPES:
         print("=" * 80)
         print(f"Dataset: {dataset_type}")
@@ -126,11 +107,10 @@ def run_all_circuit_analyses(
 
         # 1) Sanity-check label tokens for potential zero logit-diff issues
         check_label_token_diff_for_dataset(
-            model_name=model_name,
+            model.tokenizer,
             dataset_type=dataset_type,
             split=split,
             max_samples=max_samples,
-            device=device,
         )
 
         # 2) Run the full circuit analysis using your existing function
@@ -149,6 +129,7 @@ def run_all_circuit_analyses(
             use_logit_diff=use_logit_diff,
             filter_model_correct=filter_model_correct,
             debug_label_tokenization=debug_label_tokenization,
+            model=model,
         )
         print(f"[{dataset_type}] Circuit analysis complete.\n")
 
