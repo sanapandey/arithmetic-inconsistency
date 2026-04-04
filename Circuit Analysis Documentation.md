@@ -13,7 +13,7 @@ The pipeline discovers a sparse subgraph (“circuit”) of a causal LM’s inte
 
 Attribution scores edges in a TransformerLens-style graph; the subgraph is formed by keeping the highest-magnitude edges (top- N). Performance is compared before (full model) and after (circuit only) using the same metric.
 
-Implementation entry point: `[circuit_analysis_eap_ig.py](circuit_analysis_eap_ig.py)`.
+Implementation entry point: `circuit_analysis_eap_ig.py`.
 
 ---
 
